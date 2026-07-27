@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Santuário da Dança - Casa OS</title>
+
+  <!-- Fontes Místicas / Élficas via Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;700&family=MedievalSharp&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Firebase Compat CDN (Padrão Antifraude para Notion) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --bg-pergaminho: #0d0a07;
+      --card-bg: rgba(23, 16, 11, 0.9);
+      --borda-dourada: #c5a059;
+      --borda-glow: rgba(197, 160, 89, 0.35);
+      --texto-primario: #e8d8c8;
+      --texto-dourado: #f0c987;
+      --rosa-danca: #e07a5f;
+      --verde-sucesso: #81b29a;
+      --fonte-titulo: 'Cinzel Decorative', serif;
+      --fonte-sub: 'Cinzel', serif;
+      --fonte-corpo: 'Quicksand', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-pergaminho);
+      color: var(--texto-primario);
+      font-family: var(--fonte-corpo);
+      margin: 0;
+      padding: 16px;
+      box-sizing: border-box;
+      display: flex;
+      justify-content: center;
+    }
+
+    .santuario-card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border: 2px solid var(--borda-dourada);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 15px var(--borda-glow);
+      backdrop-filter: blur(8px);
+    }
+
+    .header-danca {
+      text-align: center;
+      border-bottom: 1px solid var(--borda-dourada);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .header-danca h1 {
+      font-family: var(--fonte-titulo);
+      font-size: 1.3rem;
+      color: var(--texto-dourado);
+      margin: 0;
+      text-shadow: 0 0 8px rgba(240, 201, 135, 0.4);
+    }
+
+    .header-danca .sub {
+      font-family: var(--fonte-sub);
+      font-size: 0.85rem;
+      color: var(--rosa-danca);
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .alerta-missao {
+      background: rgba(224, 122, 95, 0.15);
+      border-left: 3px solid var(--rosa-danca);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .fases-nav {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn-fase {
+      flex: 1;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--borda-dourada);
+      color: var(--texto-primario);
+      padding: 8px 4px;
+      border-radius: 6px;
+      font-family: var(--fonte-sub);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-fase.ativa {
+      background: var(--borda-dourada);
+      color: #0d0a07;
+      font-weight: bold;
+      box-shadow: 0 0 10px var(--borda-glow);
+    }
+
+    .fase-conteudo {
+      display: none;
+    }
+
+    .fase-conteudo.ativa {
+      display: block;
+    }
+
+    .cronograma-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(197, 160, 89, 0.2);
+    }
+
+    .cronograma-item .hora {
+      font-family: var(--fonte-sub);
+      color: var(--texto-dourado);
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    .cronograma-item .desc {
+      font-size: 0.85rem;
+      flex: 1;
+      margin-left: 12px;
+    }
+
+    .destaque-saida {
+      background: rgba(129, 178, 154, 0.2);
+      border: 1px solid var(--verde-sucesso);
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 12px;
+      text-align: center;
+      font-weight: bold;
+      color: var(--verde-sucesso);
+    }
+
+    .protecoes-list {
+      list-style: none;
+      padding-left: 0;
+      font-size: 0.85rem;
+    }
+
+    .protecoes-list li {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .frase-entrada {
+      font-family: 'MedievalSharp', cursive;
+      font-size: 1.05rem;
+      color: var(--texto-dourado);
+      text-align: center;
+      padding: 16px;
+      border: 1px dashed var(--borda-dourada);
+      border-radius: 8px;
+      margin: 16px 0;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .btn-exportar {
+      width: 100%;
+      background: linear-gradient(135deg, #c5a059, #e07a5f);
+      border: none;
+      color: #0d0a07;
+      font-family: var(--fonte-sub);
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="santuario-card">
+    <div class="header-danca">
+      <h1>💃 Santuário da Dança</h1>
+      <div class="sub">27/07/2026 — Bachata (Hoje)</div>
+    </div>
+
+    <div class="alerta-missao">
+      <strong>🎯 Missão de Hoje:</strong> Chegar à aula em condições suficientemente boas para vivê-la — sem exigir desempenho perfeito.
+    </div>
+
+    <div class="fases-nav">
+      <button class="btn-fase ativa" onclick="mudarFase('antes', event)">🌅 1. Antes</button>
+      <button class="btn-fase" onclick="mudarFase('durante', event)">🌸 2. Vivência</button>
+      <button class="btn-fase" onclick="mudarFase('depois', event)">🌙 3. Integração</button>
+    </div>
+
+    <!-- FASE 1: ANTES -->
+    <div id="fase-antes" class="fase-conteudo ativa">
+      <h3 style="font-family: var(--fonte-sub); color: var(--texto-dourado); font-size: 0.95rem; margin-top:0;">⏱️ Linha do Tempo de Saída</h3>
+      
+      <div class="cronograma-item">
+        <span class="hora">Até 18h45</span>
+        <span class="desc">Só demandas essenciais. Evitar começar algo novo.</span>
+      </div>
+      <div class="cronograma-item">
+        <span class="hora">18h45–19h05</span>
+        <span class="desc">Comer pão de queijo 🧀 + beber água + descompressão.</span>
+      </div>
+      <div class="cronograma-item">
+        <span class="hora">19h05–19h25</span>
+        <span class="desc">Trocar de roupa, casaco, meia, água, chaves e bolsa.</span>
+      </div>
+      <div class="cronograma-item" style="color: var(--rosa-danca);">
+        <span class="hora">19h25</span>
+        <span class="desc">🚨 ALARME: Fim do planejamento. Início da saída.</span>
+      </div>
+      <div class="cronograma-item">
+        <span class="hora">19h30</span>
+        <span class="desc">Banheiro + calçado + chaves na mão.</span>
+      </div>
+
+      <div class="destaque-saida">
+        📍 19h40 — Estar lá embaixo pronta para sair!
+      </div>
+
+      <h4 style="font-family: var(--fonte-sub); color: var(--texto-dourado); margin-bottom: 4px; margin-top: 16px;">🛡️ Kit de Proteção Sensorial</h4>
+      <ul class="protecoes-list">
+        <li><input type="checkbox" id="k1"> <label for="k1">Casaco / Roupa quente para deslocamento</label></li>
+        <li><input type="checkbox" id="k2"> <label for="k2">Garrafa de água & Meia confortável</label></li>
+        <li><input type="checkbox" id="k3"> <label for="k3">Protetor auricular na bolsa (ruído)</label></li>
+        <li><input type="checkbox" id="k4"> <label for="k4">Barrinha de proteína (reserva)</label></li>
+      </ul>
+    </div>
+
+    <!-- FASE 2: DURANTE -->
+    <div id="fase-durante" class="fase-conteudo">
+      <div class="frase-entrada">
+        “Hoje não vim provar nada. Vim descobrir como meu corpo se sente dançando.”
+      </div>
+      <h4 style="font-family: var(--fonte-sub); color: var(--texto-dourado);">✨ Permissões de Hoje:</h4>
+      <ul class="protecoes-list">
+        <li>🌿 Ficar mais atrás ou em posição confortável.</li>
+        <li>🌿 Observar antes de acompanhar um movimento.</li>
+        <li>🌿 Fazer pausa / Beber água sempre que precisar.</li>
+        <li>🌿 Dançar em intensidade menor. Sem acertar tudo.</li>
+      </ul>
+    </div>
+
+    <!-- FASE 3: DEPOIS -->
+    <div id="fase-depois" class="fase-conteudo">
+      <h3 style="font-family: var(--fonte-sub); color: var(--texto-dourado); font-size: 0.95rem; margin-top:0;">✨ Registro de Integração (< 2 min)</h3>
+      
+      <p style="font-size: 0.85rem;"><strong>Como eu cheguei vs. Como eu fiquei:</strong></p>
+      <select id="estado-pos" style="width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--borda-dourada); color: var(--texto-primario); border-radius: 4px; margin-bottom: 12px;">
+        <option value="mais_viva">Mais viva ✨</option>
+        <option value="mais_leve">Mais leve 🌸</option>
+        <option value="cansada_bom">Cansada de um jeito bom 🌙</option>
+        <option value="igual">Igual ⚖️</option>
+        <option value="sobrecarregada">Sensorialmente sobrecarregada 🧊</option>
+      </select>
+
+      <label style="font-size: 0.85rem;"><strong>Ajuste para a aula de amanhã (Zouk - 28/07):</strong></label>
+      <textarea id="ajuste-amanha" rows="3" style="width: 100%; background: rgba(0,0,0,0.5); border: 1px solid var(--borda-dourada); color: var(--texto-primario); border-radius: 4px; margin-top: 4px; box-sizing: border-box;" placeholder="O que manter ou corrigir para amanhã?"></textarea>
+
+      <button class="btn-exportar" onclick="salvarEExportar()">🌱 Salvar no Firestore & Alimentar Zouk</button>
+    </div>
+
+  </div>
+
+  <script>
+    // Inicialização do Firebase com as suas Chaves Reais
+    const firebaseConfig = {
+      apiKey: "AIzaSyD19AiSaJosyhNL8iz4J-D1mHgbu-MOKm4",
+      authDomain: "planejamentos-83b23.firebaseapp.com",
+      projectId: "planejamentos-83b23",
+      storageBucket: "planejamentos-83b23.firebasestorage.app",
+      messagingSenderId: "651538842400",
+      appId: "1:651538842400:web:5d0b45e7df8f2ac1f0cd45",
+      measurementId: "G-GK5XJ7FZN1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function mudarFase(fase, event) {
+      document.querySelectorAll('.fase-conteudo').forEach(el => el.classList.remove('ativa'));
+      document.querySelectorAll('.btn-fase').forEach(el => el.classList.remove('ativa'));
+
+      document.getElementById('fase-' + fase).classList.add('ativa');
+      event.target.classList.add('ativa');
+    }
+
+    async function salvarEExportar() {
+      const estado = document.getElementById('estado-pos').value;
+      const ajuste = document.getElementById('ajuste-amanha').value;
+
+      const payload = {
+        data: '27/07/2026',
+        modalidade: 'Bachata',
+        estadoPos: estado,
+        ajusteAmanha: ajuste,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      // 1. Persistência Dupla: LocalStorage para resposta instantânea
+      localStorage.setItem('danca_integracao_2707', JSON.stringify(payload));
+
+      // 2. Gravação Central no Firestore
+      try {
+        await db.collection("eventos_especiais").add(payload);
+        alert('✨ Integração registrada no Firestore do Motor Central com sucesso! O Zouk de amanhã já receberá essa preparação.');
+      } catch (err) {
+        console.error("Erro ao gravar no Firestore:", err);
+        alert('✨ Registrado localmente com sucesso!');
+      }
+    }
+  </script>
+</body>
+</html>
